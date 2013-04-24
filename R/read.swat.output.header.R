@@ -16,7 +16,21 @@ read.swat.output.header <-
     header <- readLines(con, 8)
     pattern <- "\\s+SWAT (\\w+ \\d+ \\d+)\\s+VER (\\d+)/Rev[^0-9]+(\\d+)"
     ver.matrix <- stringr::str_match(header[2], pattern)
-    list(date = as.Date(ver.matrix[2], "%b %d %Y"),
-         version = as.numeric(ver.matrix[3]),
-         rev = as.numeric(ver.matrix[4]))
+    if (!is.na(ver.matrix[1,1]))
+        return (
+        list(date = as.Date(ver.matrix[2], "%b %d %Y"),
+             version = as.numeric(ver.matrix[3]),
+             rev = as.numeric(ver.matrix[4]))
+        )
+    ## SWAT 2005?
+    pattern <- "\\s+SWAT\\s+(\\w+) '(\\d+)\\s+VERSION(\\d+)"
+    ver.matrix <- stringr::str_match(header[2], pattern)
+    mnths <- list(Sept = "September")
+    if (!is.na(ver.matrix[1,1]))
+        return (
+        list(date = as.Date(paste(1, mnths[[ver.matrix[1,2]]], ver.matrix[1,3]), "%d %b %y"),
+             version = as.numeric(ver.matrix[4]),
+             rev = 481)         # Change if formats are much different
+        )
+    stop("Unknown SWAT revision")
 }
